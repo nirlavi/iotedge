@@ -11,14 +11,18 @@ namespace Microsoft.Azure.Devices.Edge.Hub.Amqp
     using Microsoft.Azure.Amqp.Framing;
     using Microsoft.Azure.Devices.Edge.Hub.Core;
     using Microsoft.Azure.Devices.Edge.Util;
+    using Microsoft.Extensions.Logging;
 
     /// <summary>
     /// This converter contains the logic to convert telemetry messages to/from amqp messages
     /// </summary>
     public class AmqpMessageConverter : IMessageConverter<AmqpMessage>
     {
+        static readonly ILogger Log = Logger.Factory.CreateLogger<AmqpMessageConverter>();
+
         public IMessage ToMessage(AmqpMessage sourceMessage)
         {
+            Log.LogInformation($"In AmqpMessageConverter:ToMessage. Message Type: {sourceMessage.GetType()}");
             byte[] GetMessageBody()
             {
                 using (var ms = new MemoryStream())
@@ -61,6 +65,7 @@ namespace Microsoft.Azure.Devices.Edge.Hub.Amqp
 
             if (sourceMessage.MessageAnnotations.Map.TryGetValue(SystemProperties.InterfaceId, out string hubInterfaceId))
             {
+                Log.LogInformation($"AMQP Add Message Anotation");
                 systemProperties.AddIfNonEmpty(SystemProperties.InterfaceId, hubInterfaceId);
             }
 
@@ -100,6 +105,7 @@ namespace Microsoft.Azure.Devices.Edge.Hub.Amqp
 
         public AmqpMessage FromMessage(IMessage message)
         {
+            Log.LogInformation($"In AmqpMessageConverter:FromMessage. Message Type: {message.GetType()}");
             AmqpMessage amqpMessage = AmqpMessage.Create(
                 new Data
                 {

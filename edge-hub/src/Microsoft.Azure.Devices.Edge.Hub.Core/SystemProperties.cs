@@ -85,7 +85,7 @@ namespace Microsoft.Azure.Devices.Edge.Hub.Core
             public const string MessageSchemaOnTheWireName = "$.schema";
             public const string CreationTimeOnTheWireName = "$.ctime";
             public const string OperationOnTheWireName = "iothub-operation";
-            public const string InterfaceIdOnTheWireName = "iothub-interface-id";
+            public const string InterfaceIdOnTheWireName = "$.ifid";
         }
     }
 }

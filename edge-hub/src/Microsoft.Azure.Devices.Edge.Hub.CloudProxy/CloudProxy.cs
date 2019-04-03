@@ -4,6 +4,7 @@ namespace Microsoft.Azure.Devices.Edge.Hub.CloudProxy
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Reflection;
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
@@ -27,6 +28,9 @@ namespace Microsoft.Azure.Devices.Edge.Hub.CloudProxy
         readonly CloudReceiver cloudReceiver;
         readonly ResettableTimer timer;
         readonly bool closeOnIdleTimeout;
+
+        static readonly ILogger Log = Logger.Factory.CreateLogger<DeviceClientMessageConverter>();
+
 
         public CloudProxy(
             IClient client,
@@ -121,10 +125,22 @@ namespace Microsoft.Azure.Devices.Edge.Hub.CloudProxy
             Preconditions.CheckNotNull(inputMessage, nameof(inputMessage));
             IMessageConverter<Message> converter = this.messageConverterProvider.Get<Message>();
             Message message = converter.FromMessage(inputMessage);
+            Log.LogInformation($"In {nameof(SendMessageAsync)}. Message Type: {inputMessage.GetType()}");
             this.timer.Reset();
             try
             {
                 await this.client.SendEventAsync(message);
+                Log.LogInformation("Message Sent");
+                var sysprop = message.GetType().GetProperty("SystemProperties", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(message) as IDictionary<string, object>;
+                if (sysprop != null)
+                {
+                    if (sysprop.ContainsKey("iothub-interface-id"))
+                    {
+                        Log.LogInformation($"After SendEventAsync. SysProp InterfaceID: {sysprop["iothub-interface-id"]}");
+                        Log.LogInformation($"After SendEventAsync. SysProp IfId: {sysprop["$.ifid"]}");
+                    }
+                }
+
                 Events.SendMessage(this);
             }
             catch (Exception ex)
@@ -143,6 +159,19 @@ namespace Microsoft.Azure.Devices.Edge.Hub.CloudProxy
             this.timer.Reset();
             try
             {
+                foreach (Message message in messages)
+                {
+                    Log.LogInformation($"Iterating MEssages in SendBatchAsync. Message Type: {message.GetType()}");
+                    var sysprop = message.GetType().GetProperty("SystemProperties", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(message) as IDictionary<string, object>;
+                    if (sysprop != null)
+                    {
+                        if (sysprop.ContainsKey("iothub-interface-id"))
+                        {
+                            Log.LogInformation($"After SendEventAsync. SysProp InterfaceID: {sysprop["iothub-interface-id"]}");
+                        }
+                    }
+                }
+
                 await this.client.SendEventBatchAsync(messages);
                 Events.SendMessage(this);
             }

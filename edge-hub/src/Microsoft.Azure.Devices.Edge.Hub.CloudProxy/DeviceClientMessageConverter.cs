@@ -21,6 +21,7 @@ namespace Microsoft.Azure.Devices.Edge.Hub.CloudProxy
 
         public Message FromMessage(IMessage inputMessage)
         {
+            Log.LogInformation($"In DeviceClientMessageConverter:FromMessage. Message Type: {inputMessage.GetType()}");
             Preconditions.CheckNotNull(inputMessage, nameof(inputMessage));
             Preconditions.CheckArgument(inputMessage.Body != null, "IMessage.Body should not be null");
             var message = new Message(inputMessage.Body);
@@ -79,25 +80,15 @@ namespace Microsoft.Azure.Devices.Edge.Hub.CloudProxy
                 {
                     if (interfaceId.Equals(Constants.SecurityMessageIoTHubInterfaceId, StringComparison.OrdinalIgnoreCase))
                     {
-                        if (message
-                            .GetType()
-                            .GetProperty("SystemProperties", BindingFlags.NonPublic | BindingFlags.Instance)
-                            ?.GetValue(message) is IDictionary<string, object> systemProperties)
+                        Log.LogInformation("Setting as SecurityMessage");
+                        var sysprop = message.GetType().GetProperty("SystemProperties", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(message) as IDictionary<string, object>;
+                        if (sysprop != null)
                         {
-                            systemProperties[SystemProperties.InterfaceId] = Constants.SecurityMessageIoTHubInterfaceId;
-                            Log.LogInformation("Set as SecurityMessage");
+                            Log.LogInformation("Got Sys Prop Instance. Updateing InterfaceID");
+                            sysprop[SystemProperties.InterfaceId] = (object)Constants.SecurityMessageIoTHubInterfaceId;
+                            sysprop["$.ifid"] = (object)Constants.SecurityMessageIoTHubInterfaceId;
                         }
-                        else
-                        {
-                            Log.LogError("Unable to set as Security Message");
-                        }
-
-                        var syspropCheck = message.GetType().GetProperty("SystemProperties", BindingFlags.NonPublic | BindingFlags.Instance)
-                            ?.GetValue(message) as IDictionary<string, object>;
-                        if (syspropCheck != null)
-                        {
-                            Log.LogInformation($"interfaceid: {syspropCheck[SystemProperties.InterfaceId]}");
-                        }
+                        //message.SetAsSecurityMessage();
                     }
                 }
             }
@@ -107,6 +98,7 @@ namespace Microsoft.Azure.Devices.Edge.Hub.CloudProxy
 
         public IMessage ToMessage(Message sourceMessage)
         {
+            Log.LogInformation($"In DeviceClientMessageConverter:ToMessage. Message Type: {sourceMessage.GetType()}");
             EdgeMessage message = new EdgeMessage.Builder(sourceMessage.GetBytes())
                 .SetProperties(sourceMessage.Properties)
                 .Build();

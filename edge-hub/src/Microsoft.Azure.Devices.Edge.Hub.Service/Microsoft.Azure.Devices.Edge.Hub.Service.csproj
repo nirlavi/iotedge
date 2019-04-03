@@ -50,6 +50,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="Microsoft.Azure.Devices.Client">
+      <HintPath>..\..\..\bin\DevicesSDK\netstandard2.0\Microsoft.Azure.Devices.Client.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="scripts\linux\generate-cert.sh">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
