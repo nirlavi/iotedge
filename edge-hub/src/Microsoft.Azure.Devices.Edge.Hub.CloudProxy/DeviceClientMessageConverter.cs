@@ -4,6 +4,9 @@ namespace Microsoft.Azure.Devices.Edge.Hub.CloudProxy
     using System;
     using System.Collections.Generic;
     using System.Globalization;
+    using System.Linq;
+    using System.Reflection;
+
     using Microsoft.Azure.Devices.Client;
     using Microsoft.Azure.Devices.Edge.Hub.Core;
     using Microsoft.Azure.Devices.Edge.Util;
@@ -76,8 +79,25 @@ namespace Microsoft.Azure.Devices.Edge.Hub.CloudProxy
                 {
                     if (interfaceId.Equals(Constants.SecurityMessageIoTHubInterfaceId, StringComparison.OrdinalIgnoreCase))
                     {
-                        Log.LogDebug("Setting as SecurityMessage");
-                        message.SetAsSecurityMessage();
+                        if (message
+                            .GetType()
+                            .GetProperty("SystemProperties", BindingFlags.NonPublic | BindingFlags.Instance)
+                            ?.GetValue(message) is IDictionary<string, object> systemProperties)
+                        {
+                            systemProperties[SystemProperties.InterfaceId] = Constants.SecurityMessageIoTHubInterfaceId;
+                            Log.LogInformation("Set as SecurityMessage");
+                        }
+                        else
+                        {
+                            Log.LogError("Unable to set as Security Message");
+                        }
+
+                        var syspropCheck = message.GetType().GetProperty("SystemProperties", BindingFlags.NonPublic | BindingFlags.Instance)
+                            ?.GetValue(message) as IDictionary<string, object>;
+                        if (syspropCheck != null)
+                        {
+                            Log.LogInformation($"interfaceid: {syspropCheck[SystemProperties.InterfaceId]}");
+                        }
                     }
                 }
             }
