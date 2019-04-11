@@ -81,14 +81,14 @@ namespace Microsoft.Azure.Devices.Edge.Hub.CloudProxy
                     if (interfaceId.Equals(Constants.SecurityMessageIoTHubInterfaceId, StringComparison.OrdinalIgnoreCase))
                     {
                         // Log.LogInformation("Setting as SecurityMessage");
-                        var sysprop = message.GetType().GetProperty("SystemProperties", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(message) as IDictionary<string, object>;
-                        if (sysprop != null)
-                        {
-                            // Log.LogInformation("Got Sys Prop Instance. Updateing InterfaceID");
-                            sysprop[SystemProperties.InterfaceId] = (object)Constants.SecurityMessageIoTHubInterfaceId;
-                            sysprop["$.ifid"] = (object)Constants.SecurityMessageIoTHubInterfaceId;
-                        }
-                        //message.SetAsSecurityMessage();
+                        message.SetAsSecurityMessage();
+                        //var sysprop = message.GetType().GetProperty("SystemProperties", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(message) as IDictionary<string, object>;
+                        //if (sysprop != null)
+                        //{
+                        //    // Log.LogInformation("Got Sys Prop Instance. Updateing InterfaceID");
+                        //    sysprop[SystemProperties.InterfaceId] = (object)Constants.SecurityMessageIoTHubInterfaceId;
+                        //    sysprop["$.ifid"] = (object)Constants.SecurityMessageIoTHubInterfaceId;
+                        //}
                     }
                 }
             }
