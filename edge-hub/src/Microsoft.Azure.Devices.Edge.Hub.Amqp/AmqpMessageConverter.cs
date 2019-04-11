@@ -22,7 +22,7 @@ namespace Microsoft.Azure.Devices.Edge.Hub.Amqp
 
         public IMessage ToMessage(AmqpMessage sourceMessage)
         {
-            Log.LogInformation($"In AmqpMessageConverter:ToMessage. Message Type: {sourceMessage.GetType()}");
+            // Log.LogInformation($"In AmqpMessageConverter:ToMessage. Message Type: {sourceMessage.GetType()}");
             byte[] GetMessageBody()
             {
                 using (var ms = new MemoryStream())
@@ -65,7 +65,7 @@ namespace Microsoft.Azure.Devices.Edge.Hub.Amqp
 
             if (sourceMessage.MessageAnnotations.Map.TryGetValue(SystemProperties.InterfaceId, out string hubInterfaceId))
             {
-                Log.LogInformation($"AMQP Add Message Anotation");
+                // Log.LogInformation($"AMQP Add Message Anotation");
                 systemProperties.AddIfNonEmpty(SystemProperties.InterfaceId, hubInterfaceId);
             }
 
@@ -105,7 +105,7 @@ namespace Microsoft.Azure.Devices.Edge.Hub.Amqp
 
         public AmqpMessage FromMessage(IMessage message)
         {
-            Log.LogInformation($"In AmqpMessageConverter:FromMessage. Message Type: {message.GetType()}");
+            // Log.LogInformation($"In AmqpMessageConverter:FromMessage. Message Type: {message.GetType()}");
             AmqpMessage amqpMessage = AmqpMessage.Create(
                 new Data
                 {
